@@ -8,9 +8,10 @@ def idenfy_type_file(file_extension):
     Define o grupo do arquivo de acordo com a extensão do arquivo
     """
     file_types = {
-        "imagem": ["jpg", "jpeg", "png"],
-        "documento": ["doc", "docx", "pdf"],
-        "video": ["mp4", "mkv", "avi"],
+        "Imagem": ["jpg", "jpeg", "png"],
+        "Documento": ["doc", "docx", "pdf"],
+        "Planilha": ["xlsx", "csv", "xls"],
+        "Vídeo": ["mp4", "mkv", "avi"],
     }
     file_type = "Outros"
     for type in file_types.keys():
@@ -34,7 +35,7 @@ def index_files(folder_selected):
                 file_size = os.stat(f"{file_data[0]}/{current_file}").st_size
                 list_files.append(FileData(current_file, file_data[0], idenfy_type_file(current_file.split('.')[-1]), file_size, folder_selected))
                 total_size_indexed_file += file_size
-                print(f"localizando arquivos: {total_size_indexed_file / (1024 * 1024) :.2f} MB indexados", end="\r")
+                # print(f"localizando arquivos: {total_size_indexed_file / (1024 * 1024) :.2f} MB indexados", end="\r")
     return list_files
 
 
