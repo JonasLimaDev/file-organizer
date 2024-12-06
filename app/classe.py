@@ -149,7 +149,6 @@ class PageAppFlet():
             self.lista_filtros.append(str(e.control.label))
         else:
             self.lista_filtros.remove(str(e.control.label))
-        # print(self.lista_filtros)
 
     def generic_alert(self, title, mensagem, cor=1):
         cores = {
