@@ -1,7 +1,7 @@
 import flet as ft
 from time import sleep
 from file_modules.manager_files_and_paths import index_files,copy_file_to_destination
-
+from configs.configuration_manager import Configuration
 
 class TextInfo(ft.Text):
     def __init__(self, value, size=16, text_align=ft.TextAlign.CENTER):
@@ -10,13 +10,34 @@ class TextInfo(ft.Text):
         self.size = size
         self.text_align = text_align
 
+
+class PersonTooltip(ft.Tooltip):
+    def __init__(self, message):
+        super().__init__()
+        self.message = message
+        self.bgcolor = ft.Colors.GREY_700
+        self.text_style = ft.TextStyle(
+            color=ft.Colors.WHITE,
+            size = 13,
+            italic = True)
+
+
+
 class SideDraer(ft.NavigationDrawer):
     def __init__(self):
         super().__init__()
         self.opcoes_copia = ft.RadioGroup(value='red',content=ft.Column([
-            ft.Radio(value="red", label="Substituir"),
-            ft.Radio(value="green", label="Manter Recentes",tooltip=ft.Tooltip(message="Mantem os arquivos com data de modificação mais recente")),
-            ft.Radio(value="blue", label="Manter Originais")])
+            ft.Radio(value="manter", label="Manter Cópia"),
+            ft.Radio(
+                value="recente", label="Manter Recentes",
+                tooltip=ft.Tooltip(
+                    message="Substitui cópias, mantendo os arquivos \ncom data de modificação mais recente",
+                    
+                )
+            ),
+            ft.Radio(value="original", label="Manter Originais"),
+            ft.Radio(value="substituir", label="Substituir"),
+            ])
         )
 
         self.controls = [
@@ -72,34 +93,23 @@ class PageAppFlet():
                 ft.Container(
                     content=ft.Row([
                         ft.Checkbox(label="Imagem", value=False,
-                        on_change=self.alterar_lista_filtros,
-                        tooltip=ft.Tooltip(
-                            message="formatos: .jpg, .jpeg, .png",
-                            bgcolor= ft.Colors.BLUE_100,
-                            )
+                        on_change = self.alterar_lista_filtros,
+                        tooltip = PersonTooltip("formatos: .jpg, .jpeg, .png")
                         ),
                         ft.Checkbox(
-                            label="Documento", value=False,
-                            on_change=self.alterar_lista_filtros,
-                            tooltip=ft.Tooltip(
-                                message="formatos: .doc, .docx, .pdf",
-                                bgcolor= ft.Colors.BLUE_100,
-                            )
+                            label = "Documento", value=False,
+                            on_change = self.alterar_lista_filtros,
+                            tooltip = PersonTooltip("formatos: .doc, .docx, .pdf")
                         ),
                         ft.Checkbox(
                             label="Planilha", value=False,
                             on_change=self.alterar_lista_filtros,
-                            tooltip=ft.Tooltip(
-                                message="formatos: .xlsx, .xls, .csv",
-                                bgcolor= ft.Colors.BLUE_100,
-                            )
+                            tooltip = PersonTooltip("formatos: .xlsx, .xls, .csv")
                         ),
                         ft.Checkbox(
                             label="Vídeo", value=False,
                             on_change=self.alterar_lista_filtros,
-                            tooltip=ft.Tooltip(
-                                message="formatos: .mp4, .mkv, .avi",
-                                bgcolor= ft.Colors.BLUE_100,
+                            tooltip=PersonTooltip("formatos: .mp4, .mkv, .avi"
                             )),
                 ],
                 alignment = ft.MainAxisAlignment.CENTER),
