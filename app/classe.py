@@ -3,6 +3,38 @@ from time import sleep
 from file_modules.manager_files_and_paths import index_files,copy_file_to_destination
 
 
+class TextInfo(ft.Text):
+    def __init__(self, value, size=16, text_align=ft.TextAlign.CENTER):
+        super().__init__()
+        self.value = value
+        self.size = size
+        self.text_align = text_align
+
+class SideDraer(ft.NavigationDrawer):
+    def __init__(self):
+        super().__init__()
+        self.opcoes_copia = ft.RadioGroup(value='red',content=ft.Column([
+            ft.Radio(value="red", label="Substituir"),
+            ft.Radio(value="green", label="Manter Recentes",tooltip=ft.Tooltip(message="Mantem os arquivos com data de modificação mais recente")),
+            ft.Radio(value="blue", label="Manter Originais")])
+        )
+
+        self.controls = [
+            ft.Container(height=30),
+            TextInfo("Configurações"),
+            ft.Divider(thickness=1),
+            TextInfo("Opções de Cópia",size=14),
+            self.opcoes_copia,
+            ft.Divider(thickness=2),
+            TextInfo("Manter Hierarquia de Pasta",size=14),
+            ft.Divider(thickness=2),
+            TextInfo("Formatos de Arquivos",size=14),
+        ]
+
+    
+
+
+
 
 class PageAppFlet():
     def __init__(self,page: ft.Page):
@@ -10,27 +42,32 @@ class PageAppFlet():
         self.page.title = "Organizador de Arquivos"
         self.page.window.width = 620       
         self.page.window.height = 680
+        self.page.theme_mode = ft.ThemeMode.DARK
         self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         self.dialogo_selecionar_pasta = ft.FilePicker(
             on_result=self.pegar_resultado_selecao
         )
+        self.page.appbar = ft.AppBar(
+        leading=ft.IconButton(icon=ft.Icons.MENU,on_click=self.mostra_opcoes),
+        leading_width=40,
+        title=ft.Text("Organizador de Arquivos"),
+        center_title=True,
+        bgcolor=ft.Colors.BLACK26,
+    )
 
-        self.cabecalho = ft.Text("Organizador de Arquivos", size=20)
+        self.drawer = SideDraer()
+
+        # self.cabecalho = TextInfo("Organizador de Arquivos", size=20)
         self.lista_filtros = []
-        self.informacao_programa = ft.Text(
+        self.informacao_programa = TextInfo(
             "Busca arquivos na pasta de origem e \
             suas subpastas, salvando uma cópia agrupada \
             por tipo de arquivo na pasta de destino".
             replace("            ",""),
-            text_align = ft.TextAlign.CENTER,
-            size=16
         )
-
         self.grupo_tipos_arquivos = ft.Column([
-            ft.Container(ft.Text(
-                "Aceita os Seguintes Grupos de Arquivos:",
-                text_align = ft.TextAlign.CENTER,
-                size=16),alignment=ft.alignment.center
+            ft.Container(TextInfo(
+                "Aceita os Seguintes Grupos de Arquivos:"),alignment=ft.alignment.center
                 ),
                 ft.Container(
                     content=ft.Row([
@@ -89,12 +126,18 @@ class PageAppFlet():
                         dialog_title="Selecione a Pasta de Destino"
                     ),
                 )
-        self.pasta_destino = ft.Text("Pasta de destino: ")
+        self.pasta_destino = TextInfo("Pasta de destino: ")
         self.botao_iniciar_processo = ft.ElevatedButton("Iniciar Cópia",on_click = self.processar_arquivos)
-        self.texto_informacao_situacao = ft.Text()
+        self.texto_informacao_situacao = TextInfo("")
         self.progresso_status = ft.ProgressRing(value=0.0)
         self.adicionar_componetes_pagina()
     
+    
+    def mostra_opcoes(self,e):
+        print("click")
+        self.page.open(self.drawer)
+
+
     def pegar_resultado_selecao(self, e: ft.FilePickerResultEvent):
         if e.control.dialog_title == "Selecione a Pasta de Destino":
             if e.path:
@@ -123,14 +166,14 @@ class PageAppFlet():
         if not self.lista_filtros:
             self.generic_alert("Erro!!!", "Nenhum Grupo de arquivo selecionado", 3)
             return
-        self.iniciar_animcao_processo("Localizando Arquivos")
+        self.iniciar_animacao_processo("Localizando Arquivos")
         lista_arquivos = index_files(pasta_origem)
         self.parar_animcao_processo()
-        self.iniciar_animcao_processo("Copiando Arquivos")
+        self.iniciar_animacao_processo("Copiando Arquivos")
         copy_file_to_destination(lista_arquivos, self.lista_filtros, pasta_destino)
         self.parar_animcao_processo()
     
-    def iniciar_animcao_processo(self, texto_acao):
+    def iniciar_animacao_processo(self, texto_acao):
         self.texto_informacao_situacao.value = texto_acao
         self.progresso_status.value = None
         self.progresso_status.update()
@@ -175,6 +218,6 @@ class PageAppFlet():
 
     def adicionar_componetes_pagina(self):
         for atributo in self.__dict__:
-            if atributo not in  ['page','lista_filtros']:
+            if atributo not in  ['page','lista_filtros','drawer']:
                 self.page.add(
                     self.adicionar_componete_em_container(self.__getattribute__(atributo)))
