@@ -2,8 +2,7 @@ from datetime import datetime
 
 
 class FileData:
-    def __init__(self, name, path,
-        type_file, file_stat, *args):
+    def __init__(self, name, path, type_file, file_stat, *args):
         self.name = name
         self.path = path
         self.type_file = type_file
@@ -13,14 +12,9 @@ class FileData:
         else:
             self.level_hierarchy = 2
         if self.path_root:
-            self.folder = self.get_folder(
-            self.level_hierarchy,
-            self.path_root
-            )
+            self.folder = self.get_folder(self.level_hierarchy, self.path_root)
         else:
-            self.get_folder(
-                self.level_hierarchy
-                )
+            self.get_folder(self.level_hierarchy)
         self.full_path = f"{self.path}/{self.name}"
         self.size = file_stat.st_size
         self.creation_date = self.time_convert(file_stat.st_ctime)

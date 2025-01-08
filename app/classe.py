@@ -6,6 +6,16 @@ from file_modules.manager_files_and_paths import (
 )
 
 
+class PersonInput(ft.TextField):
+    def __init__(self, label, value=None, input_filter=None):
+        super().__init__()
+        self.label = label
+        self.value = value
+        self.input_filter = input_filter
+        self.text_size = 14
+        self.label_style = ft.TextStyle(size=18)
+
+
 class TextInfo(ft.Text):
     def __init__(self, value, size=16, text_align=ft.TextAlign.CENTER):
         super().__init__()
@@ -27,21 +37,46 @@ class PersonTooltip(ft.Tooltip):
 class SideDraer(ft.NavigationDrawer):
     def __init__(self):
         super().__init__()
+        self.nivel_pastas = PersonInput(
+            label="Número niveis mantidos",
+            value=2,
+            input_filter=ft.NumbersOnlyInputFilter(),
+        )
+        self.formatos_imagem = PersonInput(
+            label="Formatos de Imagens",
+        )
+        self.formatos_documento = PersonInput(label="Formatos de Documentos")
+        self.formatos_planilha = PersonInput(label="Formatos de Planilhas")
+        self.formatos_audio = PersonInput(label="Formatos de Aúdios")
+        self.formatos_video = PersonInput(label="Formatos de Vídeos")
         self.opcoes_copia = ft.RadioGroup(
-            value="red",
+            value="manter",
             content=ft.Column(
                 [
-                    ft.Radio(value="manter", label="Manter Cópia"),
+                    ft.Radio(
+                        value="manter",
+                        label="Manter Numerada",
+                        tooltip=PersonTooltip(
+                            message="Mantem cópias adicionado o número de cada\
+                                \ncópia no nome do arquivo.",
+                        ),
+                    ),
                     ft.Radio(
                         value="recente",
                         label="Manter Recentes",
-                        tooltip=ft.Tooltip(
+                        tooltip=PersonTooltip(
                             message="Substitui cópias, mantendo os arquivos\
                                 \ncom data de modificação mais recente",
                         ),
                     ),
-                    ft.Radio(value="original", label="Manter Originais"),
-                    ft.Radio(value="substituir", label="Substituir"),
+                    ft.Radio(
+                        value="original",
+                        label="Manter Originais",
+                        tooltip=PersonTooltip(
+                            message="Substitui cópias, mantendo os arquivos\
+                                \ncom data de modificação mais antiga",
+                        ),
+                    ),
                 ]
             ),
         )
@@ -53,10 +88,24 @@ class SideDraer(ft.NavigationDrawer):
             TextInfo("Opções de Cópia", size=14),
             self.opcoes_copia,
             ft.Divider(thickness=2),
-            TextInfo("Manter Hierarquia de Pasta", size=14),
+            TextInfo("Nivel de Hierarquia de Pasta", size=14),
+            self.adicionar_container_input(self.nivel_pastas),
             ft.Divider(thickness=2),
             TextInfo("Formatos de Arquivos", size=14),
+            self.adicionar_container_input(self.formatos_imagem),
+            self.adicionar_container_input(self.formatos_documento),
+            self.adicionar_container_input(self.formatos_planilha),
+            self.adicionar_container_input(self.formatos_audio),
+            self.adicionar_container_input(self.formatos_video),
         ]
+
+    @staticmethod
+    def adicionar_container_input(conteudo):
+        return ft.Container(
+            margin=ft.margin.symmetric(horizontal=30, vertical=5),
+            padding=ft.padding.symmetric(horizontal=20, vertical=10),
+            content=conteudo,
+        )
 
 
 class PageAppFlet:
@@ -67,7 +116,7 @@ class PageAppFlet:
         self.page.window.height = 680
         self.page.theme_mode = ft.ThemeMode.DARK
         self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-        self.dialogo_selecionar_pasta = ft.FilePicker(
+        self.dialogo_escolher_pasta = ft.FilePicker(
             on_result=self.pegar_resultado_selecao
         )
         self.page.appbar = ft.AppBar(
@@ -142,8 +191,7 @@ class PageAppFlet:
         self.botao_selecionar_pasta = ft.ElevatedButton(
             "Selecione o Local de Origem",
             icon=ft.Icons.FOLDER_OPEN,
-            on_click=lambda _: self.dialogo_selecionar_pasta.
-            get_directory_path(
+            on_click=lambda _: self.dialogo_escolher_pasta.get_directory_path(
                 dialog_title="Selecione a Pasta de Origem"
             ),
         )
@@ -151,8 +199,7 @@ class PageAppFlet:
         self.selecionar_pasta_destino = ft.ElevatedButton(
             "Selecione o Local de Destino",
             icon=ft.Icons.FOLDER_OPEN,
-            on_click=lambda _: self.dialogo_selecionar_pasta.
-            get_directory_path(
+            on_click=lambda _: self.dialogo_escolher_pasta.get_directory_path(
                 dialog_title="Selecione a Pasta de Destino"
             ),
         )
@@ -192,25 +239,25 @@ class PageAppFlet:
         )
         if not pasta_origem or "Nenhum Local Selecionado!" in pasta_origem:
             print("Origem Não Selecionada")
-            self.generic_alert("Erro!!!", "Origem Não Selecionada", 3)
+            self.alerta_generico("Erro!!!", "Origem Não Selecionada", 3)
             return
 
         if not pasta_destino or "Nenhum Local Selecionado!" in pasta_destino:
-            self.generic_alert("Erro!!!", "Destino Não Selecionado", 3)
+            self.alerta_generico("Erro!!!", "Destino Não Selecionado", 3)
             return
         if not self.lista_filtros:
-            self.generic_alert(
+            self.alerta_generico(
                 "Erro!!!", "Nenhum Grupo de arquivo selecionado", 3
             )
             return
         self.iniciar_animacao_processo("Localizando Arquivos")
         lista_arquivos = index_files(pasta_origem)
-        self.parar_animcao_processo()
+        self.parar_animacao_processo()
         self.iniciar_animacao_processo("Copiando Arquivos")
         copy_file_to_destination(
             lista_arquivos, self.lista_filtros, pasta_destino
         )
-        self.parar_animcao_processo()
+        self.parar_animacao_processo()
 
     def iniciar_animacao_processo(self, texto_acao):
         self.texto_informacao_situacao.value = texto_acao
@@ -218,7 +265,7 @@ class PageAppFlet:
         self.progresso_status.update()
         self.texto_informacao_situacao.update()
 
-    def parar_animcao_processo(self):
+    def parar_animacao_processo(self):
         self.texto_informacao_situacao.value = ""
         self.progresso_status.value = 0
         self.progresso_status.update()
@@ -230,7 +277,7 @@ class PageAppFlet:
         else:
             self.lista_filtros.remove(str(e.control.label))
 
-    def generic_alert(self, title, mensagem, cor=1):
+    def alerta_generico(self, titulo, mensagem, cor=1):
         cores = {
             1: ft.Colors.GREEN_500,
             2: ft.Colors.LIGHT_BLUE_ACCENT_200,
@@ -238,7 +285,7 @@ class PageAppFlet:
         }
         self.page.open(
             ft.AlertDialog(
-                title=ft.Text(f"{title}"),
+                title=ft.Text(f"{titulo}"),
                 content=ft.Text(f"{mensagem}"),
                 bgcolor=cores[cor],
             )
