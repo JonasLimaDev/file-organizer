@@ -21,7 +21,12 @@ class Configuration:
         self.configurations[config] = value
         self.save_configuration_file()
 
+    def create_initial_configuration(self, configurations):
+        for configuration, value in configurations.items():
+            self.configurations[configuration] = value
+        self.save_configuration_file()
+
     def save_configuration_file(self):
         with open(self.path_file_config, "w", encoding="utf-8") as file:
             for config in self.configurations:
-                file.write(f"{config}:{self.configurations[config]}\n")
+                file.write(f"{config}: {self.configurations[config]}\n")

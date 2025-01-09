@@ -1,9 +1,29 @@
 import flet as ft
 
+# from flet import NavigationDrawer
+from flet.core.types import OptionalControlEventCallable
+
+from configs.configuration_manager import Configuration
 from file_modules.manager_files_and_paths import (
     copy_file_to_destination,
     index_files,
 )
+
+initial_configuration = {
+    "niveis-mantidos": 2,
+    "formatos-imagem": ".jpg, .jpeg, .png",
+    "formatos-documento": ".doc, .docx, .pdf",
+    "formatos-planilha": ".xlsx, .xls, .csv",
+    "formatos-audio": "mp3, mva",
+    "formatos-video": "mp4, mkv, avi ",
+    "opcoes-copia": "manter",
+}
+PATH_CONFIG = "./settings.config"
+config = Configuration(PATH_CONFIG)
+config.load_configurations()
+if not config.configurations:
+    config.create_initial_configuration(initial_configuration)
+    config.load_configurations()
 
 
 class PersonInput(ft.TextField):
@@ -35,22 +55,39 @@ class PersonTooltip(ft.Tooltip):
 
 
 class SideDraer(ft.NavigationDrawer):
-    def __init__(self):
+    def __init__(self, on_dismiss):
         super().__init__()
+        self.on_dismiss = on_dismiss
+
         self.nivel_pastas = PersonInput(
             label="Número niveis mantidos",
-            value=2,
+            value=config.configurations["niveis-mantidos"],
             input_filter=ft.NumbersOnlyInputFilter(),
         )
         self.formatos_imagem = PersonInput(
             label="Formatos de Imagens",
+            value=config.configurations["formatos-imagem"],
         )
-        self.formatos_documento = PersonInput(label="Formatos de Documentos")
-        self.formatos_planilha = PersonInput(label="Formatos de Planilhas")
-        self.formatos_audio = PersonInput(label="Formatos de Aúdios")
-        self.formatos_video = PersonInput(label="Formatos de Vídeos")
+        # config = Configuration("./settings.config")
+        # config.save_configuration_file()
+        self.formatos_documento = PersonInput(
+            label="Formatos de Documentos",
+            value=config.configurations["formatos-documento"],
+        )
+        self.formatos_planilha = PersonInput(
+            label="Formatos de Planilhas",
+            value=config.configurations["formatos-planilha"],
+        )
+        self.formatos_audio = PersonInput(
+            label="Formatos de Aúdios",
+            value=config.configurations["formatos-audio"],
+        )
+        self.formatos_video = PersonInput(
+            label="Formatos de Vídeos",
+            value=config.configurations["formatos-video"],
+        )
         self.opcoes_copia = ft.RadioGroup(
-            value="manter",
+            value=config.configurations["opcoes-copia"],
             content=ft.Column(
                 [
                     ft.Radio(
@@ -97,15 +134,44 @@ class SideDraer(ft.NavigationDrawer):
             self.adicionar_container_input(self.formatos_planilha),
             self.adicionar_container_input(self.formatos_audio),
             self.adicionar_container_input(self.formatos_video),
+            self.adicionar_container_input(
+                ft.ElevatedButton("salvar", on_click=self.salvar_opcoes)
+            ),
         ]
 
     @staticmethod
     def adicionar_container_input(conteudo):
         return ft.Container(
-            margin=ft.margin.symmetric(horizontal=30, vertical=5),
-            padding=ft.padding.symmetric(horizontal=20, vertical=10),
+            margin=ft.margin.symmetric(horizontal=20, vertical=5),
+            padding=ft.padding.symmetric(horizontal=15, vertical=10),
             content=conteudo,
         )
+
+    def salvar_opcoes(self, e):
+        for atributo in self.__dict__:
+            if atributo[0] != "_" and atributo not in set(
+                [
+                    "badge",
+                    "tooltip",
+                    "parent",
+                ]
+            ):
+                config.add_configuration(
+                    atributo.replace("_", "-"), getattr(self, atributo).value
+                )
+                # print(getattr(self,atributo).value)
+        config.save_configuration_file()
+        self.update()
+
+    @property
+    def on_dismiss(self) -> OptionalControlEventCallable:
+        return self._get_event_handler("dismiss")
+
+    @on_dismiss.setter
+    def on_dismiss(self, handler: OptionalControlEventCallable):
+        self._add_event_handler("dismiss", handler)
+
+        # print(self.formatos_documento.value)
 
 
 class PageAppFlet:
@@ -115,13 +181,15 @@ class PageAppFlet:
         self.page.window.width = 620
         self.page.window.height = 680
         self.page.theme_mode = ft.ThemeMode.DARK
+
         self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         self.dialogo_escolher_pasta = ft.FilePicker(
             on_result=self.pegar_resultado_selecao
         )
         self.page.appbar = ft.AppBar(
             leading=ft.IconButton(
-                icon=ft.Icons.MENU, on_click=self.mostra_opcoes
+                icon=ft.Icons.MENU,
+                on_click=self.mostra_opcoes,
             ),
             leading_width=40,
             title=ft.Text("Organizador de Arquivos"),
@@ -129,7 +197,7 @@ class PageAppFlet:
             bgcolor=ft.Colors.BLACK26,
         )
 
-        self.drawer = SideDraer()
+        self.drawer = SideDraer(on_dismiss=self.update_configs_page)
 
         # self.cabecalho = TextInfo("Organizador de Arquivos", size=20)
         self.lista_filtros = []
@@ -139,6 +207,31 @@ class PageAppFlet:
             por tipo de arquivo na pasta de destino".replace(
                 "            ", ""
             ),
+        )
+        self.tooltip_imagem = PersonTooltip(
+            f"formatos: {
+                config.configurations['formatos-imagem']
+                }"
+        )
+        self.tooltip_documento = PersonTooltip(
+            f"formatos: {
+                config.configurations['formatos-documento']
+                }"
+        )
+        self.tooltip_planilha = PersonTooltip(
+            f"formatos: {
+                config.configurations['formatos-planilha']
+                }"
+        )
+        self.tooltip_video = PersonTooltip(
+            f"formatos: {
+                config.configurations['formatos-video']
+                }"
+        )
+        self.tooltip_audio = PersonTooltip(
+            f"formatos: {
+                config.configurations['formatos-audio']
+                }"
         )
         self.grupo_tipos_arquivos = ft.Column(
             [
@@ -153,33 +246,31 @@ class PageAppFlet:
                                 label="Imagem",
                                 value=False,
                                 on_change=self.alterar_lista_filtros,
-                                tooltip=PersonTooltip(
-                                    "formatos: .jpg, .jpeg, .png"
-                                ),
+                                tooltip=self.tooltip_imagem,
                             ),
                             ft.Checkbox(
                                 label="Documento",
                                 value=False,
                                 on_change=self.alterar_lista_filtros,
-                                tooltip=PersonTooltip(
-                                    "formatos: .doc, .docx, .pdf"
-                                ),
+                                tooltip=self.tooltip_documento,
                             ),
                             ft.Checkbox(
                                 label="Planilha",
                                 value=False,
                                 on_change=self.alterar_lista_filtros,
-                                tooltip=PersonTooltip(
-                                    "formatos: .xlsx, .xls, .csv"
-                                ),
+                                tooltip=self.tooltip_planilha,
                             ),
                             ft.Checkbox(
                                 label="Vídeo",
                                 value=False,
                                 on_change=self.alterar_lista_filtros,
-                                tooltip=PersonTooltip(
-                                    "formatos: .mp4, .mkv, .avi"
-                                ),
+                                tooltip=self.tooltip_video,
+                            ),
+                            ft.Checkbox(
+                                label="Aúdio",
+                                value=False,
+                                on_change=self.alterar_lista_filtros,
+                                tooltip=self.tooltip_audio,
                             ),
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
@@ -213,6 +304,7 @@ class PageAppFlet:
 
     def mostra_opcoes(self, e):
         self.page.open(self.drawer)
+        self.page.update()
 
     def pegar_resultado_selecao(self, e: ft.FilePickerResultEvent):
         if e.control.dialog_title == "Selecione a Pasta de Destino":
@@ -303,9 +395,34 @@ class PageAppFlet:
 
     def adicionar_componetes_pagina(self):
         for atributo in self.__dict__:
-            if atributo not in set(["page", "lista_filtros", "drawer"]):
+            if atributo not in set(
+                [
+                    "page",
+                    "lista_filtros",
+                    "drawer",
+                    "tooltip_imagem",
+                    "tooltip_documento",
+                    "tooltip_planilha",
+                    "tooltip_video",
+                    "tooltip_audio",
+                ]
+            ):
                 self.page.add(
                     self.adicionar_componete_em_container(
                         getattr(self, atributo)
                     )
                 )
+
+    def update_configs_page(self, e):
+        # print(vars(self.grupo_tipos_arquivos))
+        self.drawer.salvar_opcoes(e)
+        config.load_configurations()
+        for atributo in self.__dict__:
+            if "tooltip" in atributo:
+                # print(atributo)
+                for config_name in config.configurations.keys():
+                    if atributo.split("_")[1] in config_name:
+                        getattr(self, atributo).message = f"formatos: {
+                            config.configurations[config_name]
+                            }"
+        self.page.update()
