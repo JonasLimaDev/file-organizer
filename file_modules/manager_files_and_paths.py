@@ -31,20 +31,26 @@ def index_files(folder_selected):
     data_list_files = os.walk(folder_selected)
     total_size_indexed_file = 0
     list_files = []
+
     for file_data in data_list_files:
+        if "." in str(file_data[0]):
+            continue
         for current_file in file_data[2]:
-            if os.path.isfile(f"{file_data[0]}/{current_file}"):
-                file_size = os.stat(f"{file_data[0]}/{current_file}").st_size
-                list_files.append(
-                    FileData(
-                        current_file,
-                        file_data[0],
-                        idenfy_type_file(current_file.split(".")[-1]),
-                        os.stat(f"{file_data[0]}/{current_file}"),
-                        folder_selected,
+            if current_file[0] != ".":
+                if os.path.isfile(f"{file_data[0]}/{current_file}"):
+                    file_size = os.stat(
+                        f"{file_data[0]}/{current_file}"
+                    ).st_size
+                    list_files.append(
+                        FileData(
+                            current_file,
+                            file_data[0],
+                            idenfy_type_file(current_file.split(".")[-1]),
+                            os.stat(f"{file_data[0]}/{current_file}"),
+                            folder_selected,
+                        )
                     )
-                )
-                total_size_indexed_file += file_size
+                    total_size_indexed_file += file_size
                 # print(f"localizando arquivos:
                 # {total_size_indexed_file / (1024 * 1024) :.2f}
                 #  MB indexados", end="\r")
