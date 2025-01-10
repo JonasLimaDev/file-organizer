@@ -330,9 +330,7 @@ class PageAppFlet:
             )
             return
         self.iniciar_animacao_processo("Localizando Arquivos")
-        lista_arquivos = index_files(
-            pasta_origem, config.configurations
-        )
+        lista_arquivos = index_files(pasta_origem, config.configurations)
         self.parar_animacao_processo()
         self.iniciar_animacao_processo("Copiando Arquivos")
         copy_file_to_destination(

@@ -86,9 +86,8 @@ def index_files(folder_selected, configuration):
                         current_file,
                         file_data[0],
                         idenfy_type_file(
-                            current_file.split(".")[-1],
-                            file_types.types
-                            ),
+                            current_file.split(".")[-1], file_types.types
+                        ),
                         os.stat(f"{file_data[0]}/{current_file}"),
                         folder_selected,
                     )
@@ -100,7 +99,7 @@ def index_files(folder_selected, configuration):
                             list_files,
                             instance_file_data,
                             duplicate_file,
-                            configuration['opcoes-copia'],
+                            configuration["opcoes-copia"],
                         )
                     else:
                         list_files.append(instance_file_data)
