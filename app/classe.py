@@ -254,7 +254,7 @@ class PageAppFlet:
                                 tooltip=self.tooltip_video,
                             ),
                             ft.Checkbox(
-                                label="Aúdio",
+                                label="Áudio",
                                 value=False,
                                 on_change=self.alterar_lista_filtros,
                                 tooltip=self.tooltip_audio,
@@ -331,7 +331,7 @@ class PageAppFlet:
             return
         self.iniciar_animacao_processo("Localizando Arquivos")
         lista_arquivos = index_files(
-            pasta_origem, config.configurations["opcoes-copia"]
+            pasta_origem, config.configurations
         )
         self.parar_animacao_processo()
         self.iniciar_animacao_processo("Copiando Arquivos")
@@ -355,6 +355,7 @@ class PageAppFlet:
     def alterar_lista_filtros(self, e):
         if e.control.label not in self.lista_filtros:
             self.lista_filtros.append(str(e.control.label))
+            print(self.lista_filtros)
         else:
             self.lista_filtros.remove(str(e.control.label))
 

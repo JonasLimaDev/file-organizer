@@ -1,19 +1,20 @@
 import os
 import shutil
 
-from .file_classes import FileData
+from .file_classes import FileData, FileTypes
 
 
-def idenfy_type_file(file_extension):
+def idenfy_type_file(file_extension, file_types):
     """
     Define o grupo do arquivo de acordo com a extensão do arquivo
     """
-    file_types = {
-        "Imagem": ["jpg", "jpeg", "png"],
-        "Documento": ["doc", "docx", "pdf"],
-        "Planilha": ["xlsx", "csv", "xls"],
-        "Vídeo": ["mp4", "mkv", "avi"],
-    }
+    # file_types = {
+    #     "Imagem": ["jpg", "jpeg", "png"],
+    #     "Documento": ["doc", "docx", "pdf"],
+    #     "Planilha": ["xlsx", "csv", "xls"],
+    #     "Vídeo": ["mp4", "mkv", "avi"],
+    # }
+    print(file_types)
     file_type = "Outros"
     for name_type, extesions in file_types.items():
         if file_extension in extesions:
@@ -60,7 +61,7 @@ def decide_file_copies(list_files, current_file, duplicate_file, option):
     return list_files
 
 
-def index_files(folder_selected, configuration=None):
+def index_files(folder_selected, configuration):
     """
     Busca Todos os arquivos da pasta selecionada e suas subpastas,
     criando uma lista de instâncias da classe FileData com as
@@ -69,6 +70,8 @@ def index_files(folder_selected, configuration=None):
     data_list_files = os.walk(folder_selected)
     total_size_indexed_file = 0
     list_files = []
+    file_types = FileTypes(configuration)
+    file_types.update_types_files()
 
     for file_data in data_list_files:
         if "." in str(file_data[0]):
@@ -82,7 +85,10 @@ def index_files(folder_selected, configuration=None):
                     instance_file_data = FileData(
                         current_file,
                         file_data[0],
-                        idenfy_type_file(current_file.split(".")[-1]),
+                        idenfy_type_file(
+                            current_file.split(".")[-1],
+                            file_types.types
+                            ),
                         os.stat(f"{file_data[0]}/{current_file}"),
                         folder_selected,
                     )
@@ -94,7 +100,7 @@ def index_files(folder_selected, configuration=None):
                             list_files,
                             instance_file_data,
                             duplicate_file,
-                            configuration,
+                            configuration['opcoes-copia'],
                         )
                     else:
                         list_files.append(instance_file_data)

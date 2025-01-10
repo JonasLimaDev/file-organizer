@@ -44,3 +44,31 @@ class FileData:
                 for folder in folders_selected[::-1]:
                     final_folder += f"{folder}/"
                 return final_folder
+
+
+class FileTypes:
+    def __init__(self, configuration_instance):
+        self.config = configuration_instance
+        self.types = {}
+
+    def update_types_files(self):
+        self.types["Imagem"] = [
+            extension.replace(".", "").strip()
+            for extension in self.config["formatos-imagem"].split(",")
+        ]
+        self.types["Documento"] = [
+            extension.replace(".", "").strip()
+            for extension in self.config["formatos-documento"].split(",")
+        ]
+        self.types["Planilha"] = [
+            extension.replace(".", "").strip()
+            for extension in self.config["formatos-documento"].split(",")
+        ]
+        self.types["Vídeo"] = [
+            extension.replace(".", "").strip()
+            for extension in self.config["formatos-video"].split(",")
+        ]
+        self.types["Áudio"] = [
+            extension.replace(".", "").strip()
+            for extension in self.config["formatos-video"].split(",")
+        ]
