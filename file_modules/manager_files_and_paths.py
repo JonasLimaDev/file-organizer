@@ -22,6 +22,26 @@ def idenfy_type_file(file_extension):
     return file_type
 
 
+def get_file_by_name(file_class, list_files):
+    for file_item in list_files:
+        if file_class.name == file_item.name:
+            return file_item
+    return None
+
+
+def is_latest_file(file_class, second_file_class):
+    if file_class.modified_date > second_file_class.modified_date:
+        return True
+    else:
+        return False
+
+
+def is_original_file(file_class, second_file_class):
+    if file_class.creation_date < second_file_class.creation_date:
+        return True
+    else:
+        return False
+
 def index_files(folder_selected):
     """
     Busca Todos os arquivos da pasta selecionada e suas subpastas,
@@ -41,16 +61,22 @@ def index_files(folder_selected):
                     file_size = os.stat(
                         f"{file_data[0]}/{current_file}"
                     ).st_size
-                    list_files.append(
-                        FileData(
+                    current_file = FileData(
                             current_file,
                             file_data[0],
                             idenfy_type_file(current_file.split(".")[-1]),
                             os.stat(f"{file_data[0]}/{current_file}"),
                             folder_selected,
                         )
-                    )
-                    total_size_indexed_file += file_size
+                    duplicatefile = get_file_by_name(current_file, list_files)
+                    if  duplicatefile:
+                        print("")
+                        print(f"Na lista - alteração: {duplicatefile.modified_date} | criação: {duplicatefile.creation_date} | original: {is_original_file(duplicatefile, current_file)} | recente: {is_latest_file(duplicatefile, current_file)}")
+                        print(f"Corrente - alteração: {current_file.modified_date} | criação: {current_file.creation_date} | original: {is_original_file(current_file, duplicatefile)} | recente: {is_latest_file(current_file, duplicatefile)}")
+                    else:
+                        list_files.append(current_file)
+                        total_size_indexed_file += file_size
+                    
                 # print(f"localizando arquivos:
                 # {total_size_indexed_file / (1024 * 1024) :.2f}
                 #  MB indexados", end="\r")

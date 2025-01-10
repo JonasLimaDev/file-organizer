@@ -23,7 +23,7 @@ class FileData:
     @staticmethod
     def time_convert(atime):
         newtime = datetime.fromtimestamp(atime)
-        return newtime.date()
+        return newtime
 
     def get_folder(self, level, path_ignore=None):
         """Identifica a hierarquia de pasatas do arquivo"""
