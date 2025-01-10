@@ -42,7 +42,25 @@ def is_original_file(file_class, second_file_class):
     else:
         return False
 
-def index_files(folder_selected):
+
+def decide_file_copies(list_files, current_file, duplicate_file, option):
+    match option:
+        case "manter":
+            list_files.append(current_file)
+        case "recente":
+            if is_latest_file(current_file, duplicate_file):
+                list_files.append(current_file)
+                list_files.remove(duplicate_file)
+        case "original":
+            if is_original_file(current_file, duplicate_file):
+                list_files.append(current_file)
+                list_files.remove(duplicate_file)
+        case None:
+            list_files.append(current_file)
+    return list_files
+
+
+def index_files(folder_selected, configuration=None):
     """
     Busca Todos os arquivos da pasta selecionada e suas subpastas,
     criando uma lista de instâncias da classe FileData com as
@@ -61,22 +79,27 @@ def index_files(folder_selected):
                     file_size = os.stat(
                         f"{file_data[0]}/{current_file}"
                     ).st_size
-                    current_file = FileData(
-                            current_file,
-                            file_data[0],
-                            idenfy_type_file(current_file.split(".")[-1]),
-                            os.stat(f"{file_data[0]}/{current_file}"),
-                            folder_selected,
+                    instance_file_data = FileData(
+                        current_file,
+                        file_data[0],
+                        idenfy_type_file(current_file.split(".")[-1]),
+                        os.stat(f"{file_data[0]}/{current_file}"),
+                        folder_selected,
+                    )
+                    duplicate_file = get_file_by_name(
+                        instance_file_data, list_files
+                    )
+                    if duplicate_file:
+                        list_files = decide_file_copies(
+                            list_files,
+                            instance_file_data,
+                            duplicate_file,
+                            configuration,
                         )
-                    duplicatefile = get_file_by_name(current_file, list_files)
-                    if  duplicatefile:
-                        print("")
-                        print(f"Na lista - alteração: {duplicatefile.modified_date} | criação: {duplicatefile.creation_date} | original: {is_original_file(duplicatefile, current_file)} | recente: {is_latest_file(duplicatefile, current_file)}")
-                        print(f"Corrente - alteração: {current_file.modified_date} | criação: {current_file.creation_date} | original: {is_original_file(current_file, duplicatefile)} | recente: {is_latest_file(current_file, duplicatefile)}")
                     else:
-                        list_files.append(current_file)
+                        list_files.append(instance_file_data)
                         total_size_indexed_file += file_size
-                    
+
                 # print(f"localizando arquivos:
                 # {total_size_indexed_file / (1024 * 1024) :.2f}
                 #  MB indexados", end="\r")

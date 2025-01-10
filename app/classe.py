@@ -1,8 +1,6 @@
 import flet as ft
 
 # from flet import NavigationDrawer
-from flet.core.types import OptionalControlEventCallable
-
 from configs.configuration_manager import Configuration
 from file_modules.manager_files_and_paths import (
     copy_file_to_destination,
@@ -56,10 +54,9 @@ class PersonTooltip(ft.Tooltip):
 
 class SideDraer(ft.NavigationDrawer):
     def __init__(self, on_dismiss):
-        super().__init__()
-        self.on_dismiss = on_dismiss
+        super().__init__(on_dismiss=on_dismiss)
 
-        self.nivel_pastas = PersonInput(
+        self.niveis_mantidos = PersonInput(
             label="Número niveis mantidos",
             value=config.configurations["niveis-mantidos"],
             input_filter=ft.NumbersOnlyInputFilter(),
@@ -111,7 +108,7 @@ class SideDraer(ft.NavigationDrawer):
                         label="Manter Originais",
                         tooltip=PersonTooltip(
                             message="Substitui cópias, mantendo os arquivos\
-                                \ncom data de modificação mais antiga",
+                                \ncom data de criação mais antiga",
                         ),
                     ),
                 ]
@@ -126,7 +123,7 @@ class SideDraer(ft.NavigationDrawer):
             self.opcoes_copia,
             ft.Divider(thickness=2),
             TextInfo("Nivel de Hierarquia de Pasta", size=14),
-            self.adicionar_container_input(self.nivel_pastas),
+            self.adicionar_container_input(self.niveis_mantidos),
             ft.Divider(thickness=2),
             TextInfo("Formatos de Arquivos", size=14),
             self.adicionar_container_input(self.formatos_imagem),
@@ -162,16 +159,6 @@ class SideDraer(ft.NavigationDrawer):
                 # print(getattr(self,atributo).value)
         config.save_configuration_file()
         self.update()
-
-    @property
-    def on_dismiss(self) -> OptionalControlEventCallable:
-        return self._get_event_handler("dismiss")
-
-    @on_dismiss.setter
-    def on_dismiss(self, handler: OptionalControlEventCallable):
-        self._add_event_handler("dismiss", handler)
-
-        # print(self.formatos_documento.value)
 
 
 class PageAppFlet:
@@ -343,7 +330,9 @@ class PageAppFlet:
             )
             return
         self.iniciar_animacao_processo("Localizando Arquivos")
-        lista_arquivos = index_files(pasta_origem)
+        lista_arquivos = index_files(
+            pasta_origem, config.configurations["opcoes-copia"]
+        )
         self.parar_animacao_processo()
         self.iniciar_animacao_processo("Copiando Arquivos")
         copy_file_to_destination(
