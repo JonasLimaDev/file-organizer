@@ -1,28 +1,12 @@
 import flet as ft
 
-# from flet import NavigationDrawer
-from configs.configuration_manager import Configuration
+from configs.configuration_manager import PATH_CONFIG, Configuration
 from file_modules.manager_files_and_paths import (
     copy_file_to_destination,
     index_files,
 )
 
-initial_configuration = {
-    "niveis-mantidos": 2,
-    "formatos-imagem": ".jpg, .jpeg, .png",
-    "formatos-documento": ".doc, .docx, .pdf",
-    "formatos-planilha": ".xlsx, .xls, .csv",
-    "formatos-audio": "mp3, mva",
-    "formatos-video": "mp4, mkv, avi ",
-    "opcoes-copia": "manter",
-}
-PATH_CONFIG = "./settings.config"
 config = Configuration(PATH_CONFIG)
-config.load_configurations()
-
-if not config.configurations:
-    config.create_initial_configuration(initial_configuration)
-    config.load_configurations()
 
 
 class PersonInput(ft.TextField):
@@ -157,7 +141,6 @@ class SideDraer(ft.NavigationDrawer):
                 config.add_configuration(
                     atributo.replace("_", "-"), getattr(self, atributo).value
                 )
-                # print(getattr(self,atributo).value)
         config.save_configuration_file()
         self.update()
 
@@ -169,6 +152,7 @@ class PageAppFlet:
         self.page.window.width = 620
         self.page.window.height = 680
         self.page.theme_mode = ft.ThemeMode.DARK
+        config.load_configurations()
 
         self.page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         self.dialogo_escolher_pasta = ft.FilePicker(
@@ -187,7 +171,6 @@ class PageAppFlet:
 
         self.drawer = SideDraer(on_dismiss=self.update_configs_page)
 
-        # self.cabecalho = TextInfo("Organizador de Arquivos", size=20)
         self.lista_filtros = []
         self.informacao_programa = TextInfo(
             "Busca arquivos na pasta de origem e \
@@ -335,8 +318,10 @@ class PageAppFlet:
         self.parar_animacao_processo()
         self.iniciar_animacao_processo("Copiando Arquivos")
         copy_file_to_destination(
-            lista_arquivos, self.lista_filtros,
-            pasta_destino, config.configurations['opcoes-copia']
+            lista_arquivos,
+            self.lista_filtros,
+            pasta_destino,
+            config.configurations["opcoes-copia"],
         )
         self.parar_animacao_processo()
 
@@ -355,7 +340,6 @@ class PageAppFlet:
     def alterar_lista_filtros(self, e):
         if e.control.label not in self.lista_filtros:
             self.lista_filtros.append(str(e.control.label))
-            # print(self.lista_filtros)
         else:
             self.lista_filtros.remove(str(e.control.label))
 
@@ -404,12 +388,10 @@ class PageAppFlet:
                 )
 
     def update_configs_page(self, e):
-        # print(vars(self.grupo_tipos_arquivos))
         self.drawer.salvar_opcoes(e)
         config.load_configurations()
         for atributo in self.__dict__:
             if "tooltip" in atributo:
-                # print(atributo)
                 for config_name in config.configurations.keys():
                     if atributo.split("_")[1] in config_name:
                         getattr(self, atributo).message = f"formatos: {

@@ -8,13 +8,6 @@ def idenfy_type_file(file_extension, file_types):
     """
     Define o grupo do arquivo de acordo com a extensão do arquivo
     """
-    # file_types = {
-    #     "Imagem": ["jpg", "jpeg", "png"],
-    #     "Documento": ["doc", "docx", "pdf"],
-    #     "Planilha": ["xlsx", "csv", "xls"],
-    #     "Vídeo": ["mp4", "mkv", "avi"],
-    # }
-    # print(file_types)
     file_type = "Outros"
     for name_type, extesions in file_types.items():
         if file_extension in extesions:
@@ -24,6 +17,10 @@ def idenfy_type_file(file_extension, file_types):
 
 
 def get_file_by_name(file_class, list_files):
+    """
+    Retorna o primeiro arquivo encontrado na lista de acordo com o nome.
+
+    """
     for file_item in list_files:
         if file_class.name == file_item.name:
             return file_item
@@ -31,6 +28,7 @@ def get_file_by_name(file_class, list_files):
 
 
 def is_latest_file(file_class, second_file_class):
+    """Mostra se o arquivo tem data de modificação superior ao comparado"""
     if file_class.modified_date > second_file_class.modified_date:
         return True
     else:
@@ -38,6 +36,7 @@ def is_latest_file(file_class, second_file_class):
 
 
 def is_original_file(file_class, second_file_class):
+    """Mostra se o arquivo tem data de criação inferior ao comparado"""
     if file_class.creation_date < second_file_class.creation_date:
         return True
     else:
@@ -45,6 +44,9 @@ def is_original_file(file_class, second_file_class):
 
 
 def decide_file_copies(list_files, current_file, duplicate_file, option):
+    """
+    Decide o comportamento de cópia de arquivo, conforme configuração passada
+    """
     match option:
         case "manter":
             list_files.append(current_file)
@@ -90,7 +92,7 @@ def index_files(folder_selected, configuration):
                         ),
                         os.stat(f"{file_data[0]}/{current_file}"),
                         folder_selected,
-                        configuration['niveis-mantidos']
+                        configuration["niveis-mantidos"],
                     )
                     duplicate_file = get_file_by_name(
                         instance_file_data, list_files
@@ -105,10 +107,6 @@ def index_files(folder_selected, configuration):
                     else:
                         list_files.append(instance_file_data)
                         total_size_indexed_file += file_size
-
-                # print(f"localizando arquivos:
-                # {total_size_indexed_file / (1024 * 1024) :.2f}
-                #  MB indexados", end="\r")
     return list_files
 
 
@@ -160,14 +158,13 @@ def copy_file_to_destination(list_files, list_filters, destination, option):
             create_folder_hierarchy(
                 destination_copy, f"{destination}/{file_item.type_file}"
             )
-            # print(f"{destination_copy}{file_item.name}")
-            # print(option)
             if option == "manter":
-                name_to_save = get_name_to_save(destination_copy, file_item.name)
+                name_to_save = get_name_to_save(
+                    destination_copy, file_item.name
+                )
             else:
                 name_to_save = file_item.name
             shutil.copy2(
                 file_item.full_path,
                 f"{destination_copy}{name_to_save}",
             )
-            print(f"Copiado: {file_item.name}")

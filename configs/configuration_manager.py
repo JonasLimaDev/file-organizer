@@ -1,5 +1,7 @@
 from os import path
 
+PATH_CONFIG = "./settings.config"
+
 
 class Configuration:
     def __init__(self, path_file_config):
