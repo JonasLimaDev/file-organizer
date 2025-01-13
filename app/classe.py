@@ -19,6 +19,7 @@ initial_configuration = {
 PATH_CONFIG = "./settings.config"
 config = Configuration(PATH_CONFIG)
 config.load_configurations()
+
 if not config.configurations:
     config.create_initial_configuration(initial_configuration)
     config.load_configurations()
@@ -334,7 +335,8 @@ class PageAppFlet:
         self.parar_animacao_processo()
         self.iniciar_animacao_processo("Copiando Arquivos")
         copy_file_to_destination(
-            lista_arquivos, self.lista_filtros, pasta_destino
+            lista_arquivos, self.lista_filtros,
+            pasta_destino, config.configurations['opcoes-copia']
         )
         self.parar_animacao_processo()
 
@@ -353,7 +355,7 @@ class PageAppFlet:
     def alterar_lista_filtros(self, e):
         if e.control.label not in self.lista_filtros:
             self.lista_filtros.append(str(e.control.label))
-            print(self.lista_filtros)
+            # print(self.lista_filtros)
         else:
             self.lista_filtros.remove(str(e.control.label))
 

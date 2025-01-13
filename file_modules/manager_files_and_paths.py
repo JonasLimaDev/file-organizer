@@ -14,7 +14,7 @@ def idenfy_type_file(file_extension, file_types):
     #     "Planilha": ["xlsx", "csv", "xls"],
     #     "Vídeo": ["mp4", "mkv", "avi"],
     # }
-    print(file_types)
+    # print(file_types)
     file_type = "Outros"
     for name_type, extesions in file_types.items():
         if file_extension in extesions:
@@ -90,6 +90,7 @@ def index_files(folder_selected, configuration):
                         ),
                         os.stat(f"{file_data[0]}/{current_file}"),
                         folder_selected,
+                        configuration['niveis-mantidos']
                     )
                     duplicate_file = get_file_by_name(
                         instance_file_data, list_files
@@ -129,6 +130,9 @@ def create_folder_hierarchy(full_path, ignore_paths=None):
 
 
 def get_name_to_save(full_path, name_file):
+    """
+    Faz numeração dos nomes de arquivos com cópias para salvar no mesmo destino
+    """
     prefix = name_file.split(".")[0]
     extension = name_file.split(".")[1]
     new_name_file = name_file
@@ -141,7 +145,7 @@ def get_name_to_save(full_path, name_file):
             return new_name_file
 
 
-def copy_file_to_destination(list_files, list_filters, destination):
+def copy_file_to_destination(list_files, list_filters, destination, option):
     """
     Copia todos os arquivos para a pasta de destino conforme
     grupos de cada arquivo.
@@ -157,7 +161,11 @@ def copy_file_to_destination(list_files, list_filters, destination):
                 destination_copy, f"{destination}/{file_item.type_file}"
             )
             # print(f"{destination_copy}{file_item.name}")
-            name_to_save = get_name_to_save(destination_copy, file_item.name)
+            # print(option)
+            if option == "manter":
+                name_to_save = get_name_to_save(destination_copy, file_item.name)
+            else:
+                name_to_save = file_item.name
             shutil.copy2(
                 file_item.full_path,
                 f"{destination_copy}{name_to_save}",

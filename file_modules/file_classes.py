@@ -8,7 +8,7 @@ class FileData:
         self.type_file = type_file
         self.path_root = args[0] if args[0] else None
         if len(args) > 1:
-            self.level_hierarchy = args[1]
+            self.level_hierarchy = int(args[1])
         else:
             self.level_hierarchy = 2
         if self.path_root:
