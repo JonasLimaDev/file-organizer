@@ -23,7 +23,7 @@ env:
   PYTHON_VERSION: 3.12.8
 
   # flet-cli version to install for `flet build`
-  FLET_CLI_VERSION: 0.28.2
+  FLET_CLI_VERSION: 0.27.5
 
   # Ensures Python uses UTF-8 encoding by default
   PYTHONUTF8: 1
@@ -47,10 +47,10 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Install flet ${{ env.FLET_CLI_VERSION }}
+    - name: Install flet-cli ${{ env.FLET_CLI_VERSION }}
       run: |
         python -m pip install --upgrade pip
-        pip install flet==$FLET_CLI_VERSION
+        pip install flet-cli==$FLET_CLI_VERSION
 
     - name: Patch for linux build
       run: |
@@ -59,7 +59,8 @@ jobs:
 
     - name: Flet Build Linux
       run: |
-        flet build linux --module-name app --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
+        cd app
+        flet build linux --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
 
     - name: Upload Linux Artifact
       uses: actions/upload-artifact@v4.3.4
@@ -68,35 +69,6 @@ jobs:
         path: build/linux
         if-no-files-found: warn
         overwrite: false
-
-  # build-macos:
-  #   runs-on: macos-latest
-
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
-
-  #   - name: Setup Python ${{ env.PYTHON_VERSION }}
-  #     uses: actions/setup-python@v5
-  #     with:
-  #       python-version: ${{ env.PYTHON_VERSION }}
-
-  #   - name: Install flet ${{ env.FLET_CLI_VERSION }}
-  #     run: |
-  #       python -m pip install --upgrade pip
-  #       pip install flet==$FLET_CLI_VERSION
-
-  #   - name: Flet Build macOS
-  #     run: |
-  #       flet build macos --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
-
-  #   - name: Upload macOS Artifact
-  #     uses: actions/upload-artifact@v4.3.4
-  #     with:
-  #       name: macos-build-artifact
-  #       path: build/macos
-  #       if-no-files-found: warn
-  #       overwrite: false
 
   build-windows:
     runs-on: windows-latest
@@ -110,14 +82,15 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Install flet ${{ env.FLET_CLI_VERSION }}
+    - name: Install flet-cli ${{ env.FLET_CLI_VERSION }}
       run: |
         python -m pip install --upgrade pip
-        pip install flet==$env:FLET_CLI_VERSION
+        pip install flet-cli==$env:FLET_CLI_VERSION
 
     - name: Flet Build Windows
       run: |
-        flet build windows --module-name app --verbose --no-rich-output --build-number=$env:BUILD_NUMBER --build-version=$env:BUILD_VERSION
+        cd app
+        flet build windows --verbose --no-rich-output --build-number=$env:BUILD_NUMBER --build-version=$env:BUILD_VERSION
 
     - name: Upload Windows Artifact
       uses: actions/upload-artifact@v4.3.4
