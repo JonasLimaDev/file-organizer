@@ -76,7 +76,7 @@ def index_files(folder_selected, configuration):
     file_types.update_types_files()
 
     for file_data in data_list_files:
-        if "." in str(file_data[0]):
+        if any(["." in folder for folder in file_data[0].split("/")]):
             continue
         for current_file in file_data[2]:
             if current_file[0] != ".":

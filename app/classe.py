@@ -174,10 +174,8 @@ class PageAppFlet:
         self.lista_filtros = []
         self.informacao_programa = TextInfo(
             "Busca arquivos na pasta de origem e \
-            suas subpastas, salvando uma cópia agrupada \
-            por tipo de arquivo na pasta de destino".replace(
-                "            ", ""
-            ),
+            suas subpastas, salvando uma cópia dos arquivos, agrupados \
+            por tipos na pasta de destino".replace("            ", ""),
         )
         self.tooltip_imagem = PersonTooltip(
             f"formatos: {
@@ -257,7 +255,9 @@ class PageAppFlet:
                 dialog_title="Selecione a Pasta de Origem"
             ),
         )
-        self.pasta_origem = ft.Text("Pasta de origem: ")
+        self.pasta_origem = ft.Text(
+            "Pasta de origem: ",
+        )
         self.selecionar_pasta_destino = ft.ElevatedButton(
             "Selecione o Local de Destino",
             icon=ft.Icons.FOLDER_OPEN,
