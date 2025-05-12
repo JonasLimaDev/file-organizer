@@ -66,7 +66,7 @@ jobs:
       uses: actions/upload-artifact@v4.3.4
       with:
         name: linux-build-artifact
-        path: build/linux
+        path: app/build/linux
         if-no-files-found: warn
         overwrite: false
 
@@ -96,6 +96,6 @@ jobs:
       uses: actions/upload-artifact@v4.3.4
       with:
         name: windows-build-artifact
-        path: build/windows
+        path: app/build/windows
         if-no-files-found: warn
         overwrite: false
