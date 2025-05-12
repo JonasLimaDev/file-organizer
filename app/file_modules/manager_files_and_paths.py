@@ -133,7 +133,7 @@ def get_name_to_save(full_path, name_file):
     """
     prefix = name_file.split(".")[0]
     extension = name_file.split(".")[1]
-    new_name_file = name_file
+    new_name_file = name_file.replace("\n","")
     counter_copies = 1
     while True:
         if os.path.isfile(f"{full_path}/{new_name_file}"):
