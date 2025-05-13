@@ -1,4 +1,5 @@
 import flet as ft
+from sys import exit
 
 from configs.configuration_manager import PATH_CONFIG, Configuration
 from file_modules.manager_files_and_paths import (
@@ -149,8 +150,8 @@ class PageAppFlet:
     def __init__(self, page: ft.Page):
         self.page = page
         self.page.title = "Organizador de Arquivos"
-        self.page.window.width = 620
-        self.page.window.height = 680
+        self.page.window.width = 640
+        self.page.window.height = 700
         self.page.theme_mode = ft.ThemeMode.DARK
         config.load_configurations()
 
@@ -269,9 +270,18 @@ class PageAppFlet:
         self.botao_iniciar_processo = ft.ElevatedButton(
             "Iniciar Cópia", on_click=self.processar_arquivos
         )
+        self.botao_cancelar_processo = ft.ElevatedButton(
+            "Cancelar", on_click=self.parar_processo, disabled=True
+        )
         self.texto_informacao_situacao = TextInfo("")
         self.progresso_status = ft.ProgressRing(value=0.0)
         self.adicionar_componetes_pagina()
+
+    def parar_processo(self,e):
+        self.parar_animacao_processo()
+        self.botao_cancelar_processo.disabled = True
+        self.botao_cancelar_processo.update()
+        exit("Operação cancelada pelo usuário")
 
     def mostra_opcoes(self, e):
         self.page.open(self.drawer)
@@ -313,6 +323,8 @@ class PageAppFlet:
                 "Erro!!!", "Nenhum Grupo de arquivo selecionado", 3
             )
             return
+        self.botao_cancelar_processo.disabled = False
+        self.botao_cancelar_processo.update()
         self.iniciar_animacao_processo("Localizando Arquivos")
         lista_arquivos = index_files(pasta_origem, config.configurations)
         self.parar_animacao_processo()
@@ -324,6 +336,8 @@ class PageAppFlet:
             config.configurations["opcoes-copia"],
         )
         self.parar_animacao_processo()
+        self.botao_cancelar_processo.disabled = True
+        self.botao_cancelar_processo.update()
 
     def iniciar_animacao_processo(self, texto_acao):
         self.texto_informacao_situacao.value = texto_acao
