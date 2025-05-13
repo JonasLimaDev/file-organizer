@@ -1,7 +1,18 @@
 import os
 import shutil
-
+import logging
 from .file_classes import FileData, FileTypes
+
+# Configuração para saída em um arquivo
+logging.basicConfig(filename='file_logs.log', encoding='utf-8', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger('Falha')
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler('falhas.log',  encoding='utf-8',)
+fh.setLevel(logging.DEBUG)
+# create formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(name)s | %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 
 def idenfy_type_file(file_extension, file_types):
@@ -164,7 +175,15 @@ def copy_file_to_destination(list_files, list_filters, destination, option):
                 )
             else:
                 name_to_save = file_item.name
-            shutil.copy2(
-                file_item.full_path,
-                f"{destination_copy}{name_to_save}",
-            )
+            try:
+                shutil.copy2(
+                    file_item.full_path,
+                    f"{destination_copy}{name_to_save}",
+                )
+                logging.info(f'Copia Realizada - {file_item.full_path} para {destination_copy}{name_to_save}')
+            except  Exception as e:
+                # print(f"Erro ao tentar copiar arquivo: {name_to_save}")
+                logging.error(f'Erro: {e}')
+                logging.error(f'Não Foi Possível Copiar - {file_item.full_path}')
+                logger.info(f' {file_item.full_path} | para | {destination_copy}{name_to_save}')
+                
